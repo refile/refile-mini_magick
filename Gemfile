@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem "refile", github: "refile/refile"
+gem "rspec", "~> 3.0"
 gem "rake"
 gem "pry"
 gem "phashion"
