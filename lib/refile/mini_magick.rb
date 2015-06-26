@@ -113,7 +113,7 @@ module Refile
     # @param [String] format        the file format to convert to
     # @return [File]                the processed file
     def call(file, *args, format: nil)
-      img = ::MiniMagick::Image.new(file.path)
+      img = ::MiniMagick::Image.open(file.path)
       img.format(format.to_s.downcase, nil) if format
       send(@method, img, *args)
 
