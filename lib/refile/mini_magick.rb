@@ -63,10 +63,12 @@ module Refile
     # @return [void]
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
     def fill(img, width, height, gravity = "Center")
-      img.combine_options do |cmd|
+      # We use `convert` to work around GraphicsMagick's absence of "gravity"
+      ::MiniMagick::Tool::Convert.new do |cmd|
         cmd.resize "#{width}x#{height}^"
         cmd.gravity gravity
         cmd.extent "#{width}x#{height}"
+        cmd.merge! [img.path, img.path]
       end
     end
 
@@ -91,7 +93,8 @@ module Refile
     # @see http://www.imagemagick.org/script/color.php
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
     def pad(img, width, height, background = "transparent", gravity = "Center")
-      img.combine_options do |cmd|
+      # We use `convert` to work around GraphicsMagick's absence of "gravity"
+      ::MiniMagick::Tool::Convert.new do |cmd|
         cmd.thumbnail "#{width}x#{height}>"
         if background == "transparent"
           cmd.background "rgba(255, 255, 255, 0.0)"
@@ -100,6 +103,7 @@ module Refile
         end
         cmd.gravity gravity
         cmd.extent "#{width}x#{height}"
+        cmd.merge! [img.path, img.path]
       end
     end
 
