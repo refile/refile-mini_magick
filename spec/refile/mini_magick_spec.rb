@@ -43,6 +43,11 @@ require "phashion"
           file = Refile::MiniMagick.new(:convert).call(portrait, "png")
           expect(::MiniMagick::Image.new(file.path).identify).to match(/PNG/)
         end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:convert).call(portrait, "png", &b) }
+            .to yield_with_args(MiniMagick::Tool)
+        end
       end
 
       describe "#limit" do
@@ -63,6 +68,11 @@ require "phashion"
         it "produces correct image" do
           file = Refile::MiniMagick.new(:limit).call(portrait, "400", "400")
           expect(file.path).to be_similar_to(fixture_path("limit.jpg"))
+        end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:limit).call(portrait, "400", "400", &b) }
+            .to yield_with_args(MiniMagick::Tool)
         end
       end
 
@@ -85,6 +95,11 @@ require "phashion"
           file = Refile::MiniMagick.new(:fit).call(portrait, "400", "400")
           expect(file.path).to be_similar_to(fixture_path("fit.jpg"))
         end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:fit).call(portrait, "400", "400", &b) }
+            .to yield_with_args(MiniMagick::Tool)
+        end
       end
 
       describe "#fill" do
@@ -106,6 +121,11 @@ require "phashion"
           file = Refile::MiniMagick.new(:fill).call(portrait, "400", "400")
           expect(file.path).to be_similar_to(fixture_path("fill.jpg"))
         end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:fill).call(portrait, "400", "400", &b) }
+            .to yield_with_args(MiniMagick::Tool)
+        end
       end
 
       describe "#pad" do
@@ -126,6 +146,11 @@ require "phashion"
         it "produces correct image" do
           file = Refile::MiniMagick.new(:pad).call(portrait, "400", "400")
           expect(file.path).to be_similar_to(fixture_path("pad.jpg"))
+        end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:pad).call(portrait, "400", "400", &b) }
+            .to yield_with_args(MiniMagick::Tool)
         end
       end
     end
