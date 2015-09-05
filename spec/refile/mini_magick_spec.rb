@@ -5,8 +5,8 @@ require "phashion"
 ["ImageMagick", "GraphicsMagick"].each do |cli|
   RSpec.context "With #{cli}", cli: cli.downcase.to_sym do
     describe Refile::MiniMagick do
-      let(:portrait) { Tempfile.new(["portrait", ".jpg"]) }
-      let(:landscape) { Tempfile.new(["landscape", ".jpg"]) }
+      let(:portrait) { Tempfile.new("portrait") }
+      let(:landscape) { Tempfile.new("landscape") }
 
       matcher :be_similar_to do |expected|
         match do |actual|
