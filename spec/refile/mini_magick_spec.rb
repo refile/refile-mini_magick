@@ -7,6 +7,7 @@ require "phashion"
     describe Refile::MiniMagick do
       let(:portrait) { Tempfile.new(["portrait", ".jpg"]) }
       let(:landscape) { Tempfile.new(["landscape", ".jpg"]) }
+      let(:resample) { Tempfile.new(["resample", ".jpg"]) }
 
       matcher :be_similar_to do |expected|
         match do |actual|
@@ -36,6 +37,7 @@ require "phashion"
       before do
         FileUtils.cp(fixture_path("portrait.jpg"), portrait.path)
         FileUtils.cp(fixture_path("landscape.jpg"), landscape.path)
+        FileUtils.cp(fixture_path("resample.jpg"), resample.path)
       end
 
       describe "#convert" do
@@ -124,6 +126,21 @@ require "phashion"
 
         it "yields the command object" do
           expect { |b| Refile::MiniMagick.new(:fill).call(portrait, "400", "400", &b) }
+            .to yield_with_args(MiniMagick::Tool)
+        end
+      end
+
+      describe "#resample" do
+        it "downsamples high resolution images to low resolution" do
+          source = ::MiniMagick::Image.new(resample.path)
+          expect(source.resolution).to eq([300, 300])
+          file = Refile::MiniMagick.new(:resample).call(resample, "72", "72")
+          result = ::MiniMagick::Image.new(file.path)
+          expect(result.resolution).to eq([72, 72])
+        end
+
+        it "yields the command object" do
+          expect { |b| Refile::MiniMagick.new(:resample).call(resample, "72", "72", &b) }
             .to yield_with_args(MiniMagick::Tool)
         end
       end
