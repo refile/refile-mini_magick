@@ -83,19 +83,19 @@ module Refile
       end
     end
 
-    # resize the image to fit within the specified dimensions while retaining
-    # the original aspect ratio in the same way as {#fill}. unlike {#fill} it
+    # Resize the image to fit within the specified dimensions while retaining
+    # the original aspect ratio in the same way as {#fill}. Unlike {#fill} it
     # will, if necessary, pad the remaining area with the given color, which
     # defaults to transparent where supported by the image format and white
     # otherwise.
     #
-    # the resulting image will always be exactly as large as the specified
+    # The resulting image will always be exactly as large as the specified
     # dimensions.
     #
-    # by default, the image will be placed in the center but this can be
+    # By default, the image will be placed in the center but this can be
     # changed via the `gravity` option.
     #
-    # @param [minimagick::image] img      the image to convert
+    # @param [MiniMagick::image] img      the image to convert
     # @param [#to_s] width                the width to fill out
     # @param [#to_s] height               the height to fill out
     # @param [string] background          the color to use as a background
@@ -108,7 +108,7 @@ module Refile
       # We use `convert` to work around GraphicsMagick's absence of "gravity"
       ::MiniMagick::Tool::Convert.new do |cmd|
         yield cmd if block_given?
-        cmd.thumbnail "#{width}x#{height}>"
+        cmd.resize "#{width}x#{height}"
         if background == "transparent"
           cmd.background "rgba(255, 255, 255, 0.0)"
         else

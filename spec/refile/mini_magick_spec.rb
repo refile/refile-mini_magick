@@ -144,8 +144,13 @@ require "phashion"
         end
 
         it "produces correct image" do
-          file = Refile::MiniMagick.new(:pad).call(portrait, "400", "400")
+          file = Refile::MiniMagick.new(:pad).call(portrait, "400", "400", "red", format: "png")
           expect(file.path).to be_similar_to(fixture_path("pad.jpg"))
+        end
+
+        it "produces correct image when enlarging" do
+          file = Refile::MiniMagick.new(:pad).call(landscape, "1000", "1000", "green")
+          expect(file.path).to be_similar_to(fixture_path("pad-large.jpg"))
         end
 
         it "yields the command object" do
