@@ -1,26 +1,25 @@
 # Refile::MiniMagick
 
-TODO: Write a gem description
+Image processing for Refile using MiniMagick.
 
 ## Installation
-
-Add this line to your application's Gemfile:
 
 ```ruby
 gem 'refile-mini_magick'
 ```
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install refile-mini_magick
-
 ## Usage
 
-TODO: Write usage instructions here
+The following processing helpers are provided for Refile:
+
+* /attachments/:token/:backend\_name**/convert/jpg**/:id
+* /attachments/:token/:backend\_name**/limit/500/500**/:id
+* /attachments/:token/:backend\_name**/fit/500/500**/:id
+* /attachments/:token/:backend\_name**/fill/500/500**/:id
+* /attachments/:token/:backend\_name**/pad/500/500**/:id
+
+Refile::MiniMagick internally delegates these methods to the [ImageProcessing]
+gem, so if you want to read further documentation go there.
 
 ## Contributing
 
@@ -29,3 +28,5 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+[ImageProcessing]: https://github.com/janko-m/image_processing

@@ -1,6 +1,6 @@
 require "refile"
 require "refile/mini_magick/version"
-require "mini_magick"
+require "image_processing/mini_magick"
 
 module Refile
   # Processes images via MiniMagick, resizing cropping and padding them.
@@ -13,12 +13,12 @@ module Refile
     # Changes the image encoding format to the given format
     #
     # @see http://www.imagemagick.org/script/command-line-options.php#format
-    # @param [MiniMagick::Image] img      the image to convert
-    # @param [String] format              the format to convert to
+    # @param [File] img        the image to convert
+    # @param [String] format   the format to convert to
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [void]
+    # @return [File, Tempfile]
     def convert(img, format, &block)
-      img.format(format.to_s.downcase, nil, &block)
+      processor.convert!(img, format, &block)
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -27,16 +27,13 @@ module Refile
     # narrower than specified in either dimension but will not be larger than
     # the specified values.
     #
-    # @param [MiniMagick::Image] img      the image to convert
-    # @param [#to_s] width                the maximum width
-    # @param [#to_s] height               the maximum height
+    # @param [File] img      the image to convert
+    # @param [#to_s] width   the maximum width
+    # @param [#to_s] height  the maximum height
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [void]
-    def limit(img, width, height)
-      img.combine_options do |cmd|
-        yield cmd if block_given?
-        cmd.resize "#{width}x#{height}>"
-      end
+    # @return [File, Tempfile]
+    def limit(img, width, height, &block)
+      processor.resize_to_limit!(img, width, height, &block)
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -44,16 +41,13 @@ module Refile
     # specified in the smaller dimension but will not be larger than the
     # specified values.
     #
-    # @param [MiniMagick::Image] img      the image to convert
-    # @param [#to_s] width                the width to fit into
-    # @param [#to_s] height               the height to fit into
+    # @param [File] img      the image to convert
+    # @param [#to_s] width   the width to fit into
+    # @param [#to_s] height  the height to fit into
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [void]
-    def fit(img, width, height)
-      img.combine_options do |cmd|
-        yield cmd if block_given?
-        cmd.resize "#{width}x#{height}"
-      end
+    # @return [File, Tempfile]
+    def fit(img, width, height, &block)
+      processor.resize_to_fit!(img, width, height, &block)
     end
 
     # Resize the image so that it is at least as large in both dimensions as
@@ -65,22 +59,15 @@ module Refile
     # By default, the center part of the image is kept, and the remainder
     # cropped off, but this can be changed via the `gravity` option.
     #
-    # @param [MiniMagick::Image] img      the image to convert
-    # @param [#to_s] width                the width to fill out
-    # @param [#to_s] height               the height to fill out
-    # @param [String] gravity             which part of the image to focus on
+    # @param [File] img         the image to convert
+    # @param [#to_s] width      the width to fill out
+    # @param [#to_s] height     the height to fill out
+    # @param [String] gravity   which part of the image to focus on
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [void]
+    # @return [File, Tempfile]
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
-    def fill(img, width, height, gravity = "Center")
-      # We use `convert` to work around GraphicsMagick's absence of "gravity"
-      ::MiniMagick::Tool::Convert.new do |cmd|
-        yield cmd if block_given?
-        cmd.resize "#{width}x#{height}^"
-        cmd.gravity gravity
-        cmd.extent "#{width}x#{height}"
-        cmd.merge! [img.path, img.path]
-      end
+    def fill(img, width, height, gravity = "Center", &block)
+      processor.resize_to_fill!(img, width, height, gravity: gravity, &block)
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -101,23 +88,11 @@ module Refile
     # @param [string] background          the color to use as a background
     # @param [string] gravity             which part of the image to focus on
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [void]
+    # @return [File, Tempfile]
     # @see http://www.imagemagick.org/script/color.php
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
-    def pad(img, width, height, background = "transparent", gravity = "Center")
-      # We use `convert` to work around GraphicsMagick's absence of "gravity"
-      ::MiniMagick::Tool::Convert.new do |cmd|
-        yield cmd if block_given?
-        cmd.resize "#{width}x#{height}"
-        if background == "transparent"
-          cmd.background "rgba(255, 255, 255, 0.0)"
-        else
-          cmd.background background
-        end
-        cmd.gravity gravity
-        cmd.extent "#{width}x#{height}"
-        cmd.merge! [img.path, img.path]
-      end
+    def pad(img, width, height, background = "transparent", gravity = "Center", &block)
+      processor.resize_and_pad!(img, width, height, background: background, gravity: gravity, &block)
     end
 
     # Process the given file. The file will be processed via one of the
@@ -130,11 +105,16 @@ module Refile
     # @param [String] format        the file format to convert to
     # @return [File]                the processed file
     def call(file, *args, format: nil, &block)
-      img = ::MiniMagick::Image.new(file.path)
-      img.format(format.to_s.downcase, nil) if format
-      send(@method, img, *args, &block)
+      file = processor.convert!(file, format) if format
+      file = send(@method, file, *args, &block)
 
-      ::File.open(img.path, "rb")
+      ::File.open(file.path, "rb")
+    end
+
+    private
+
+    def processor
+      ImageProcessing::MiniMagick
     end
   end
 end
