@@ -69,14 +69,20 @@ module Refile
     # @param [#to_s] width                the width to fill out
     # @param [#to_s] height               the height to fill out
     # @param [String] gravity             which part of the image to focus on
+    # @param [string] background          the color to use as a background
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
     # @return [void]
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
-    def fill(img, width, height, gravity = "Center")
+    def fill(img, width, height, gravity = "Center", background = "transparent")
       # We use `convert` to work around GraphicsMagick's absence of "gravity"
       ::MiniMagick::Tool::Convert.new do |cmd|
         yield cmd if block_given?
         cmd.resize "#{width}x#{height}^"
+        if background == "transparent"
+          cmd.background "rgba(255, 255, 255, 0.0)"
+        else
+          cmd.background background
+        end
         cmd.gravity gravity
         cmd.extent "#{width}x#{height}"
         cmd.merge! [img.path, img.path]
