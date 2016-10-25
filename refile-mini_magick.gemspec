@@ -18,6 +18,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "refile", "~> 0.5"
-  spec.add_dependency "image_processing", "~> 0.2"
+  spec.add_dependency "image_processing", ">= 0.4.1", "< 1.0"
   spec.add_dependency "mini_magick", ">= 4.3.5"
 end
