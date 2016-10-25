@@ -8,6 +8,14 @@ Image processing for Refile using MiniMagick.
 gem 'refile-mini_magick'
 ```
 
+Note that the master branch switched to using the [ImageProcessing] gem, which
+actively fixes the bugs reported on this repo, so it's recommended to pull
+refile-mini_magick from master:
+
+```rb
+gem 'refile-mini_magick', github: 'refile/refile-mini_magick'
+```
+
 ## Usage
 
 The following processing helpers are provided for Refile:
