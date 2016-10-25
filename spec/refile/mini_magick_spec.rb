@@ -81,4 +81,17 @@ RSpec.describe Refile::MiniMagick do
         .to yield_with_args(MiniMagick::Tool)
     end
   end
+
+  describe "#resample" do
+    it "downsamples high resolution images to low resolution" do
+      file = Refile::MiniMagick.new(:resample).call(landscape, "30", "30")
+      result = ::MiniMagick::Image.new(file.path)
+      expect(result.resolution).to eq [30, 30]
+    end
+
+    it "yields the command object" do
+      expect { |b| Refile::MiniMagick.new(:resample).call(landscape, "30", "30", &b) }
+        .to yield_with_args(MiniMagick::Tool)
+    end
+  end
 end

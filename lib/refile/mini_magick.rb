@@ -95,6 +95,22 @@ module Refile
       processor.resize_and_pad!(img, width, height, background: background, gravity: gravity, &block)
     end
 
+    # Resample the image to fit within the specified resolution while retaining
+    # the original image size.
+    #
+    # The resulting image will always be the same pixel size as the source with
+    # an adjusted resolution dimensions.
+    #
+    # @param [minimagick::image] img      the image to convert
+    # @param [#to_s] width                the dpi width
+    # @param [#to_s] height               the dpi height
+    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
+    # @return [File, Tempfile]
+    # @see http://www.imagemagick.org/script/command-line-options.php#resample
+    def resample(img, width, height, &block)
+      processor.resample!(img, width, height, &block)
+    end
+
     # Process the given file. The file will be processed via one of the
     # instance methods of this class, depending on the `method` argument passed
     # to the constructor on initialization.
@@ -117,6 +133,6 @@ module Refile
   end
 end
 
-[:fill, :fit, :limit, :pad, :convert].each do |name|
+[:fill, :fit, :limit, :pad, :convert, :resample].each do |name|
   Refile.processor(name, Refile::MiniMagick.new(name))
 end
