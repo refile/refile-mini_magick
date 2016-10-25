@@ -106,9 +106,7 @@ module Refile
     # @return [File]                the processed file
     def call(file, *args, format: nil, &block)
       file = processor.convert!(file, format) if format
-      file = send(@method, file, *args, &block)
-
-      ::File.open(file.path, "rb")
+      send(@method, file, *args, &block)
     end
 
     private
