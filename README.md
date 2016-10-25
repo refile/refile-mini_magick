@@ -19,11 +19,12 @@ The following processing helpers are provided for Refile:
 * /attachments/:token/:backend\_name**/pad/500/500**/:id
 
 Refile::MiniMagick internally delegates these methods to the [ImageProcessing]
-gem, so if you want to read further documentation go there.
+dependency gem, so you can read documentation about these processing methods on
+that repository.
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/refile-mini_magick/fork )
+1. Fork it ( https://github.com/refile/refile-mini_magick/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
