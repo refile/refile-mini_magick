@@ -33,6 +33,8 @@ module Refile
     # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
     # @return [File, Tempfile]
     def limit(img, width, height, &block)
+      width  ||= "!"
+      height ||= "!"
       processor.resize_to_limit!(img, width, height, &block)
     end
 

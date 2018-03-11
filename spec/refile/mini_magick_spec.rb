@@ -38,6 +38,45 @@ RSpec.describe Refile::MiniMagick do
       expect { |b| Refile::MiniMagick.new(:limit).call(portrait, "400", "400", &b) }
         .to yield_with_args(MiniMagick::Tool)
     end
+
+    context "when width or height is nil" do
+      it "resizes the image up to only a width limit" do
+        file = Refile::MiniMagick.new(:limit).call(portrait, "400", nil)
+        result = ::MiniMagick::Image.new(file.path)
+        expect(result.width).to eq(400)
+        expect(result.height).to eq(800)
+      end
+
+      it "resizes the image up to only a height limit" do
+        file = Refile::MiniMagick.new(:limit).call(portrait, nil, "400")
+        result = ::MiniMagick::Image.new(file.path)
+        expect(result.width).to eq(600)
+        expect(result.height).to eq(400)
+      end
+    end
+
+    context "when use '!' to limit a exact width or height" do
+      it "resizes the image up to only a width limit" do
+        file = Refile::MiniMagick.new(:limit).call(portrait, "400", "800!")
+        result = ::MiniMagick::Image.new(file.path)
+        expect(result.width).to eq(400)
+        expect(result.height).to eq(800)
+      end
+
+      it "resizes the image up to only a height limit" do
+        file = Refile::MiniMagick.new(:limit).call(portrait, "600!", "400")
+        result = ::MiniMagick::Image.new(file.path)
+        expect(result.width).to eq(600)
+        expect(result.height).to eq(400)
+      end
+
+      it "resizes the image but it doesn't go beyong the image dimensions" do
+        file = Refile::MiniMagick.new(:limit).call(portrait, "300", "1000!")
+        result = ::MiniMagick::Image.new(file.path)
+        expect(result.width).to eq(300)
+        expect(result.height).to eq(800)
+      end
+    end
   end
 
   describe "#fit" do
