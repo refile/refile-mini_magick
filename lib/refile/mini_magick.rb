@@ -13,12 +13,11 @@ module Refile
     # Changes the image encoding format to the given format
     #
     # @see http://www.imagemagick.org/script/command-line-options.php#format
-    # @param [File] img        the image to convert
-    # @param [String] format   the format to convert to
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
-    def convert(img, format, &block)
-      processor.convert!(img, format, &block)
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [String] format                       the format to convert to
+    # @return [Tempfile]
+    def convert(pipeline, format)
+      pipeline.convert!(format)
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -27,15 +26,13 @@ module Refile
     # narrower than specified in either dimension but will not be larger than
     # the specified values.
     #
-    # @param [File] img      the image to convert
-    # @param [#to_s] width   the maximum width
-    # @param [#to_s] height  the maximum height
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
-    def limit(img, width, height, &block)
-      width  ||= "!"
-      height ||= "!"
-      processor.resize_to_limit!(img, width, height, &block)
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] width                         the maximum width
+    # @param [#to_s] height                        the maximum height
+    # @yield [MiniMagick::Tool::Convert]
+    # @return [Tempfile]
+    def limit(pipeline, width, height)
+      pipeline.resize_to_limit!(width || "!", height || "!")
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -43,13 +40,12 @@ module Refile
     # specified in the smaller dimension but will not be larger than the
     # specified values.
     #
-    # @param [File] img      the image to convert
-    # @param [#to_s] width   the width to fit into
-    # @param [#to_s] height  the height to fit into
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
-    def fit(img, width, height, &block)
-      processor.resize_to_fit!(img, width, height, &block)
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] width                         the width to fit into
+    # @param [#to_s] height                        the height to fit into
+    # @return [Tempfile]
+    def fit(pipeline, width, height)
+      pipeline.resize_to_fit!(width, height)
     end
 
     # Resize the image so that it is at least as large in both dimensions as
@@ -61,15 +57,14 @@ module Refile
     # By default, the center part of the image is kept, and the remainder
     # cropped off, but this can be changed via the `gravity` option.
     #
-    # @param [File] img         the image to convert
-    # @param [#to_s] width      the width to fill out
-    # @param [#to_s] height     the height to fill out
-    # @param [String] gravity   which part of the image to focus on
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] width                         the width to fill out
+    # @param [#to_s] height                        the height to fill out
+    # @param [String] gravity                      which part of the image to focus on
+    # @return [Tempfile]
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
-    def fill(img, width, height, gravity = "Center", &block)
-      processor.resize_to_fill!(img, width, height, gravity: gravity, &block)
+    def fill(pipeline, width, height, gravity = "Center")
+      pipeline.resize_to_fill!(width, height, gravity: gravity)
     end
 
     # Resize the image to fit within the specified dimensions while retaining
@@ -84,17 +79,16 @@ module Refile
     # By default, the image will be placed in the center but this can be
     # changed via the `gravity` option.
     #
-    # @param [MiniMagick::image] img      the image to convert
-    # @param [#to_s] width                the width to fill out
-    # @param [#to_s] height               the height to fill out
-    # @param [string] background          the color to use as a background
-    # @param [string] gravity             which part of the image to focus on
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] width                         the width to fill out
+    # @param [#to_s] height                        the height to fill out
+    # @param [string] background                   the color to use as a background
+    # @param [string] gravity                      which part of the image to focus on
+    # @return [Tempfile]
     # @see http://www.imagemagick.org/script/color.php
     # @see http://www.imagemagick.org/script/command-line-options.php#gravity
-    def pad(img, width, height, background = "transparent", gravity = "Center", &block)
-      processor.resize_and_pad!(img, width, height, background: background, gravity: gravity, &block)
+    def pad(pipeline, width, height, background = "transparent", gravity = "Center")
+      pipeline.resize_and_pad!(width, height, gravity: gravity, background: background)
     end
 
     # Resample the image to fit within the specified resolution while retaining
@@ -103,14 +97,13 @@ module Refile
     # The resulting image will always be the same pixel size as the source with
     # an adjusted resolution dimensions.
     #
-    # @param [minimagick::image] img      the image to convert
-    # @param [#to_s] width                the dpi width
-    # @param [#to_s] height               the dpi height
-    # @yield [MiniMagick::Tool::Mogrify, MiniMagick::Tool::Convert]
-    # @return [File, Tempfile]
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] width                         the dpi width
+    # @param [#to_s] height                        the dpi height
+    # @return [Tempfile]
     # @see http://www.imagemagick.org/script/command-line-options.php#resample
-    def resample(img, width, height, &block)
-      processor.resample!(img, width, height, &block)
+    def resample(pipeline, width, height)
+      pipeline.resample!("#{width}x#{height}")
     end
 
     # Process the given file. The file will be processed via one of the
@@ -119,18 +112,16 @@ module Refile
     #
     # If the format is given it will convert the image to the given file format.
     #
-    # @param [Tempfile] file        the file to manipulate
-    # @param [String] format        the file format to convert to
-    # @return [File]                the processed file
+    # @param [File] file                  the file to manipulate
+    # @param [String] format              the file format to convert to
+    # @yield [MiniMagick::Tool::Convert]
+    # @return [Tempfile]                  the processed file
     def call(file, *args, format: nil, &block)
-      file = processor.convert!(file, format) if format
-      send(@method, file, *args, &block)
-    end
+      pipeline = ImageProcessing::MiniMagick.source(file)
+      pipeline = pipeline.convert(format) if format
+      pipeline = pipeline.custom(&block)
 
-    private
-
-    def processor
-      ImageProcessing::MiniMagick
+      send(@method, pipeline, *args)
     end
   end
 end
