@@ -91,6 +91,17 @@ module Refile
       pipeline.resize_and_pad!(width, height, gravity: gravity, background: background)
     end
 
+    # Adjust the quality level of an JPEG/MIFF/PNG image to the specified
+    # quality level.
+    #
+    # @param [ImageProcesing::Pipeline] pipeline   processing pipeline to call
+    # @param [#to_s] level                         the JPEG/MIFF/PNG compression level
+    # @return [Tempfile]
+    # @see http://www.imagemagick.org/script/command-line-options.php#quality
+    def quality(pipeline, level)
+      pipeline.quality!(level)
+    end
+
     # Resample the image to fit within the specified resolution while retaining
     # the original image size.
     #
@@ -114,11 +125,13 @@ module Refile
     #
     # @param [File] file                  the file to manipulate
     # @param [String] format              the file format to convert to
+    # @param [#to_s] quality              the quality level to apply
     # @yield [MiniMagick::Tool::Convert]
     # @return [Tempfile]                  the processed file
-    def call(file, *args, format: nil, &block)
+    def call(file, *args, format: nil, quality: nil, &block)
       pipeline = ImageProcessing::MiniMagick.source(file)
       pipeline = pipeline.convert(format) if format
+      pipeline = pipeline.quality(quality) if quality
       pipeline = pipeline.custom(&block)
 
       send(@method, pipeline, *args)
@@ -126,6 +139,6 @@ module Refile
   end
 end
 
-[:fill, :fit, :limit, :pad, :convert, :resample].each do |name|
+[:fill, :fit, :limit, :pad, :convert, :quality, :resample].each do |name|
   Refile.processor(name, Refile::MiniMagick.new(name))
 end

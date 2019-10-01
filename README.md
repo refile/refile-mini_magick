@@ -25,6 +25,7 @@ The following processing helpers are provided for Refile:
 * /attachments/:token/:backend\_name**/fit/500/500**/:id
 * /attachments/:token/:backend\_name**/fill/500/500**/:id
 * /attachments/:token/:backend\_name**/pad/500/500**/:id
+* /attachments/:token/:backend\_name**/quality/50**/:id
 * /attachments/:token/:backend\_name**/resample/500/500**/:id
 
 Refile::MiniMagick internally delegates to [ImageProcessing] dependency gem, so
