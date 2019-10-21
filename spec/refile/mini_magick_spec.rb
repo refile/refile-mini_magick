@@ -14,6 +14,21 @@ RSpec.describe Refile::MiniMagick do
     FileUtils.cp(fixture_path("landscape.jpg"), landscape.path)
   end
 
+  describe '#call' do
+    it 'accepts a image format' do
+      file = Refile::MiniMagick.new(:limit)
+                               .call(portrait, "400", "400", format: 'png')
+      expect(::MiniMagick::Image.new(file.path).identify).to match(/PNG/)
+    end
+
+    it 'accepts a quality level' do
+      file = Refile::MiniMagick.new(:limit)
+                               .call(portrait, "400", "400", quality: '50')
+      details = ::MiniMagick::Image.new(file.path).identify(&:verbose)
+      expect(details).to match(/Quality: 50/)
+    end
+  end
+
   describe "#convert" do
     it "changes the image format" do
       file = Refile::MiniMagick.new(:convert).call(portrait, "png")
@@ -117,6 +132,20 @@ RSpec.describe Refile::MiniMagick do
 
     it "yields the command object" do
       expect { |b| Refile::MiniMagick.new(:pad).call(portrait, "400", "400", &b) }
+        .to yield_with_args(MiniMagick::Tool)
+    end
+  end
+
+  describe "#quality" do
+    it "reduces high quality images to low quality" do
+      file = Refile::MiniMagick.new(:quality).call(landscape, "50")
+      result = ::MiniMagick::Image.new(file.path)
+      details = ::MiniMagick::Image.new(file.path).identify(&:verbose)
+      expect(details).to match(/Quality: 50/)
+    end
+
+    it "yields the command object" do
+      expect { |b| Refile::MiniMagick.new(:quality).call(landscape, "50", &b) }
         .to yield_with_args(MiniMagick::Tool)
     end
   end
